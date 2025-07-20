@@ -1,4 +1,4 @@
-// OnlyBlock Background Service Worker
+// OnlyBlock Background Script
 
 // Handle extension installation
 chrome.runtime.onInstalled.addListener((details) => {
@@ -16,13 +16,15 @@ chrome.runtime.onInstalled.addListener((details) => {
     }
 })
 
-// Handle extension icon click
-chrome.action.onClicked.addListener((tab) => {
-    // Open popup when icon is clicked
-    chrome.action.setPopup({
-        popup: 'popup.html'
+// Handle extension icon click (works with both service workers and background scripts)
+if (chrome.action) {
+    chrome.action.onClicked.addListener((tab) => {
+        // Open popup when icon is clicked
+        chrome.action.setPopup({
+            popup: 'popup.html'
+        })
     })
-})
+}
 
 // Handle messages from content script
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {

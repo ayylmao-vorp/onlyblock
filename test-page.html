@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OnlyBlock Test Page</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #000;
+            color: #fff;
+        }
+
+        .tweet {
+            border: 1px solid #333;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .username {
+            color: #1da1f2;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .bio {
+            color: #ccc;
+            margin-top: 5px;
+        }
+
+        .status {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #1a1a1a;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #333;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="status" id="status">
+        OnlyBlock Test Page
+    </div>
+
+    <h1>OnlyBlock Test Page</h1>
+    <p>This page simulates X.com content to test the OnlyBlock extension.</p>
+
+    <!-- Test Profile 1: Has OnlyFans link -->
+    <div class="tweet" data-testid="tweet">
+        <div class="user-info">
+            <a href="https://twitter.com/testuser1" class="username" data-testid="User-Name">@testuser1</a>
+        </div>
+        <div class="bio" data-testid="UserDescription">
+            Check out my content on onlyfans.com/username
+        </div>
+    </div>
+
+    <!-- Test Profile 2: Has OnlyFans link with different format -->
+    <div class="tweet" data-testid="tweet">
+        <div class="user-info">
+            <a href="https://twitter.com/testuser2" class="username" data-testid="User-Name">@testuser2</a>
+        </div>
+        <div class="bio" data-testid="UserDescription">
+            My free OF: onlyfans.co/username
+        </div>
+    </div>
+
+    <!-- Test Profile 3: Has "my free of" phrase -->
+    <div class="tweet" data-testid="tweet">
+        <div class="user-info">
+            <a href="https://twitter.com/testuser3" class="username" data-testid="User-Name">@testuser3</a>
+        </div>
+        <div class="bio" data-testid="UserDescription">
+            Check out my free OF content!
+        </div>
+    </div>
+
+    <!-- Test Profile 4: Clean profile -->
+    <div class="tweet" data-testid="tweet">
+        <div class="user-info">
+            <a href="https://twitter.com/cleanuser" class="username" data-testid="User-Name">@cleanuser</a>
+        </div>
+        <div class="bio" data-testid="UserDescription">
+            Just a regular user with no OnlyFans links
+        </div>
+    </div>
+
+    <script>
+        // Update status
+        function updateStatus(message) {
+            document.getElementById('status').textContent = message
+        }
+
+        // Check if extension is loaded
+        setTimeout(() => {
+            if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.id) {
+                updateStatus('Extension detected')
+            } else {
+                updateStatus('No extension detected')
+            }
+        }, 1000)
+
+        // Listen for console messages
+        const originalLog = console.log
+        console.log = function (...args) {
+            if (args[0] && args[0].includes('OnlyBlock')) {
+                updateStatus('OnlyBlock: ' + args.join(' '))
+            }
+            originalLog.apply(console, args)
+        }
+    </script>
+</body>
+
+</html>

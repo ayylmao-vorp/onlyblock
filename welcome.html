@@ -151,10 +151,14 @@
                 <div class="feature-icon">✓</div>
                 <div class="feature-text">View and manage blocked profiles from the popup</div>
             </div>
+            <div class="feature">
+                <div class="feature-icon">✓</div>
+                <div class="feature-text">Block posts and comments containing specific phrases</div>
+            </div>
         </div>
 
         <div class="cta">
-            <button class="cta-button" onclick="window.close()">
+            <button class="cta-button" id="get-started-btn">
                 Get Started
             </button>
         </div>
@@ -163,24 +167,35 @@
             <p>
                 OnlyBlock is now active on X.com. Visit any profile page to see it in action!
                 <br><br>
-                <a href="#" onclick="openSettings()">Settings</a> •
-                <a href="#" onclick="openHelp()">Help</a>
+                <a href="#" id="settings-link">Settings</a> •
+                <a href="#" id="help-link">Help</a>
             </p>
         </div>
     </div>
 
     <script>
-        function openSettings() {
-            chrome.tabs.create({
-                url: chrome.runtime.getURL('settings.html')
+        document.addEventListener('DOMContentLoaded', function () {
+            // Get Started button
+            document.getElementById('get-started-btn').addEventListener('click', function () {
+                window.close()
             })
-        }
 
-        function openHelp() {
-            chrome.tabs.create({
-                url: chrome.runtime.getURL('help.html')
+            // Settings link
+            document.getElementById('settings-link').addEventListener('click', function (e) {
+                e.preventDefault()
+                chrome.tabs.create({
+                    url: chrome.runtime.getURL('settings.html')
+                })
             })
-        }
+
+            // Help link
+            document.getElementById('help-link').addEventListener('click', function (e) {
+                e.preventDefault()
+                chrome.tabs.create({
+                    url: chrome.runtime.getURL('help.html')
+                })
+            })
+        })
     </script>
 </body>
 

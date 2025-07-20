@@ -193,6 +193,12 @@
                 <li>Linktree pages containing OnlyFans</li>
                 <li>Bio.link pages containing OnlyFans</li>
             </ul>
+
+            <h3>Blocked Phrases in Posts:</h3>
+            <ul class="feature-list">
+                <li>"my free of" (and similar variations)</li>
+                <li>Additional phrases can be added in the settings</li>
+            </ul>
         </div>
 
         <div class="section">
@@ -285,10 +291,18 @@
             </ul>
         </div>
 
-        <button class="back-button" onclick="window.close()">
+        <button class="back-button" id="close-help-btn">
             Close Help
         </button>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            document.getElementById('close-help-btn').addEventListener('click', function () {
+                window.close()
+            })
+        })
+    </script>
 </body>
 
 </html>

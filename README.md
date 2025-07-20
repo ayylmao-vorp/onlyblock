@@ -6,6 +6,7 @@ A browser extension that automatically blocks X.com (Twitter) profiles containin
 
 - 🔍 **Automatic Detection**: Scans profile bios for OnlyFans link patterns
 - 🚫 **Instant Blocking**: Hides profiles with detected links immediately
+- 📝 **Phrase Blocking**: Blocks posts and comments containing specific phrases
 - 🎛️ **Easy Control**: Toggle blocking on/off with a simple switch
 - 📊 **Profile Management**: View and unblock profiles from the popup
 - 💾 **Persistent Storage**: Saves blocked profiles across browser sessions
@@ -20,16 +21,24 @@ A browser extension that automatically blocks X.com (Twitter) profiles containin
 4. Click "Load unpacked" and select the extension folder
 5. The OnlyBlock icon should appear in your browser toolbar
 
+**Note**: The extension will work without icons, but if you want to add custom icons:
+1. Open `create-icons.html` in your browser
+2. Click "Download Icons" to get the PNG files
+3. Place the downloaded files in the `icons/` folder
+4. Add the icon section back to `manifest.json` (works for both Chrome and Firefox)
+
 ### Firefox
 1. Download or clone this repository
 2. Open Firefox and navigate to `about:debugging`
 3. Click "This Firefox" in the sidebar
-4. Click "Load Temporary Add-on" and select the `manifest.json` file
+4. Click "Load Temporary Add-on" and select the `manifest-firefox.json` file
+5. **Note**: Firefox uses manifest v3 with background scripts, while Chrome uses service workers
 
 ## How It Works
 
-OnlyBlock uses pattern matching to detect common OnlyFans link formats:
+OnlyBlock uses pattern matching to detect common OnlyFans link formats and specific phrases:
 
+**Link Detection:**
 - `onlyfans.com`
 - `onlyfans.co`
 - `of.ly`
@@ -37,7 +46,10 @@ OnlyBlock uses pattern matching to detect common OnlyFans link formats:
 - Linktree pages containing OnlyFans
 - Bio.link pages containing OnlyFans
 
-When a profile with these links is detected, it's automatically hidden from view. You can manage blocked profiles through the extension popup.
+**Phrase Detection:**
+- "my free of" (and similar variations)
+
+When a profile with these links or a post with these phrases is detected, it's automatically hidden from view. You can manage blocked profiles through the extension popup.
 
 ## Usage
 
@@ -80,10 +92,25 @@ onlyblock/
 3. Load the extension in developer mode
 4. Test on X.com pages
 
+### Testing
+The extension includes a built-in test page for debugging:
+1. Open the extension settings
+2. Click "Open Test Page" (development feature)
+3. The test page simulates X.com content with OnlyFans links
+4. Check browser console for debug messages
+
+### Building for Store
+When ready to publish to extension stores:
+```bash
+node build-for-store.js
+```
+This removes development features like the test page functionality.
+
 ### Key Files
 - `content.js`: Contains the main blocking logic
 - `popup.js`: Handles the popup interface
 - `manifest.json`: Extension configuration and permissions
+- `test-page.html`: Development test page (removed in production)
 
 ## Troubleshooting
 

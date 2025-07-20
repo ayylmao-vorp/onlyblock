@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Icon Generator</title>
+</head>
+
+<body>
+    <h1>OnlyBlock Icon Generator</h1>
+    <p>This page will generate the required icon files for the extension.</p>
+
+    <canvas id="icon16" width="16" height="16"></canvas>
+    <canvas id="icon48" width="48" height="48"></canvas>
+    <canvas id="icon128" width="128" height="128"></canvas>
+
+    <br><br>
+    <button id="generate-btn">Generate Icons</button>
+    <button id="download-btn">Download Icons</button>
+
+    <script>
+        function generateIcons() {
+            const sizes = [16, 48, 128];
+
+            sizes.forEach(size => {
+                const canvas = document.getElementById(`icon${size}`);
+                const ctx = canvas.getContext('2d');
+
+                // Clear canvas
+                ctx.clearRect(0, 0, size, size);
+
+                // Create gradient background
+                const gradient = ctx.createLinearGradient(0, 0, size, size);
+                gradient.addColorStop(0, '#667eea');
+                gradient.addColorStop(1, '#764ba2');
+
+                // Draw background circle
+                ctx.fillStyle = gradient;
+                ctx.beginPath();
+                ctx.arc(size / 2, size / 2, size / 2 - 2, 0, 2 * Math.PI);
+                ctx.fill();
+
+                // Draw white border
+                ctx.strokeStyle = 'white';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                // Draw "OB" text
+                ctx.fillStyle = 'white';
+                ctx.font = `bold ${size * 0.4}px Arial`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('OB', size / 2, size / 2);
+            });
+        }
+
+        function downloadIcons() {
+            const sizes = [16, 48, 128];
+
+            sizes.forEach(size => {
+                const canvas = document.getElementById(`icon${size}`);
+                const link = document.createElement('a');
+                link.download = `icon${size}.png`;
+                link.href = canvas.toDataURL();
+                link.click();
+            });
+        }
+
+        // Generate icons on load
+        window.onload = generateIcons;
+
+        // Add event listeners
+        document.addEventListener('DOMContentLoaded', function () {
+            document.getElementById('generate-btn').addEventListener('click', generateIcons)
+            document.getElementById('download-btn').addEventListener('click', downloadIcons)
+        })
+    </script>
+</body>
+
+</html>

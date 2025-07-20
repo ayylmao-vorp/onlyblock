@@ -105,12 +105,36 @@
             margin-top: 4px;
         }
 
+        /* DEV: Test page section styling */
+        #test-page-section {
+            border: 2px dashed #ff6b6b;
+            background: #fff5f5;
+        }
+
+        #test-page-section .setting-label {
+            color: #d63031;
+        }
+
+        #test-page-section .setting-description {
+            color: #e17055;
+        }
+
+        #test-page-btn {
+            background: #ff6b6b;
+            border-color: #ff6b6b;
+        }
+
+        #test-page-btn:hover {
+            background: #e17055;
+            border-color: #e17055;
+        }
+
         .toggle {
+            width: 50px;
+            height: 26px;
+            background: #ddd;
+            border-radius: 13px;
             position: relative;
-            width: 44px;
-            height: 24px;
-            background: #ccc;
-            border-radius: 12px;
             cursor: pointer;
             transition: background 0.3s;
         }
@@ -121,34 +145,33 @@
 
         .toggle::after {
             content: '';
-            position: absolute;
-            top: 2px;
-            left: 2px;
             width: 20px;
             height: 20px;
             background: white;
             border-radius: 50%;
+            position: absolute;
+            top: 3px;
+            left: 3px;
             transition: transform 0.3s;
         }
 
         .toggle.active::after {
-            transform: translateX(20px);
+            transform: translateX(24px);
         }
 
         .button {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #667eea;
             color: white;
             border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 500;
+            padding: 8px 16px;
+            border-radius: 6px;
             cursor: pointer;
-            transition: transform 0.2s;
+            font-size: 14px;
+            transition: background 0.3s;
         }
 
         .button:hover {
-            transform: translateY(-2px);
+            background: #5a6fd8;
         }
 
         .button.danger {
@@ -159,39 +182,135 @@
             background: #c82333;
         }
 
-        .info {
-            background: #d1ecf1;
-            border: 1px solid #bee5eb;
-            border-radius: 6px;
-            padding: 16px;
-            margin: 16px 0;
-            color: #0c5460;
-        }
-
-        .warning {
-            background: #fff3cd;
-            border: 1px solid #ffeaa7;
-            border-radius: 6px;
-            padding: 16px;
-            margin: 16px 0;
-            color: #856404;
-        }
-
         .back-button {
             background: #6c757d;
             color: white;
             border: none;
             padding: 12px 24px;
             border-radius: 8px;
-            font-size: 14px;
-            font-weight: 500;
             cursor: pointer;
-            transition: transform 0.2s;
+            font-size: 16px;
+            width: 100%;
             margin-top: 20px;
+            transition: background 0.3s;
         }
 
         .back-button:hover {
-            transform: translateY(-2px);
+            background: #5a6268;
+        }
+
+        .blocked-profiles-section {
+            display: none;
+            margin-top: 20px;
+        }
+
+        .profiles-list {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            margin-top: 16px;
+        }
+
+        .profile-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .profile-item:last-child {
+            border-bottom: none;
+        }
+
+        .profile-info {
+            display: flex;
+            align-items: center;
+            flex: 1;
+        }
+
+        .profile-avatar {
+            width: 32px;
+            height: 32px;
+            background: #667eea;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 12px;
+        }
+
+        .profile-details {
+            flex: 1;
+        }
+
+        .profile-username {
+            font-weight: 500;
+            color: #333;
+        }
+
+        .profile-blocked-date {
+            font-size: 12px;
+            color: #666;
+            margin-top: 2px;
+        }
+
+        .unblock-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: background 0.3s;
+        }
+
+        .unblock-btn:hover {
+            background: #c82333;
+        }
+
+        .empty-profiles {
+            text-align: center;
+            padding: 40px 20px;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .loading-profiles {
+            text-align: center;
+            padding: 40px 20px;
+            color: #666;
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 12px;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .version-info {
+            font-size: 12px;
+            color: #999;
+            text-align: center;
+            margin-top: 20px;
         }
     </style>
 </head>
@@ -205,12 +324,12 @@
         </div>
 
         <div class="section">
-            <h2>General Settings</h2>
+            <h2>Blocking Settings</h2>
 
             <div class="setting-item">
                 <div>
-                    <div class="setting-label">Enable OnlyBlock</div>
-                    <div class="setting-description">Turn blocking on or off globally</div>
+                    <div class="setting-label">Enable Blocking</div>
+                    <div class="setting-description">Turn blocking on/off globally</div>
                 </div>
                 <div class="toggle" id="enable-toggle"></div>
             </div>
@@ -222,52 +341,61 @@
                 </div>
                 <div class="toggle" id="notification-toggle"></div>
             </div>
-        </div>
-
-        <div class="section">
-            <h2>Blocking Rules</h2>
 
             <div class="setting-item">
                 <div>
                     <div class="setting-label">Block OnlyFans Links</div>
-                    <div class="setting-description">Detect and block profiles with OnlyFans links</div>
+                    <div class="setting-description">Block profiles with OnlyFans links in bio</div>
                 </div>
-                <div class="toggle active" id="onlyfans-toggle"></div>
+                <div class="toggle" id="onlyfans-toggle"></div>
             </div>
 
             <div class="setting-item">
                 <div>
-                    <div class="setting-label">Block Link Shorteners</div>
-                    <div class="setting-description">Block profiles using link shorteners (of.ly, fans.ly)</div>
+                    <div class="setting-label">Block URL Shorteners</div>
+                    <div class="setting-description">Block profiles with shortened OnlyFans links</div>
                 </div>
-                <div class="toggle active" id="shortener-toggle"></div>
+                <div class="toggle" id="shortener-toggle"></div>
             </div>
 
             <div class="setting-item">
                 <div>
-                    <div class="setting-label">Block Link Aggregators</div>
-                    <div class="setting-description">Block profiles using Linktree, Bio.link, etc.</div>
+                    <div class="setting-label">Block Aggregators</div>
+                    <div class="setting-description">Block profiles with link aggregators (Linktree, etc.)</div>
                 </div>
-                <div class="toggle active" id="aggregator-toggle"></div>
+                <div class="toggle" id="aggregator-toggle"></div>
+            </div>
+
+            <div class="setting-item">
+                <div>
+                    <div class="setting-label">Block Phrases</div>
+                    <div class="setting-description">Block posts containing specific phrases</div>
+                </div>
+                <div class="toggle" id="phrase-toggle"></div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Blocked Profiles</h2>
+            <div class="setting-item">
+                <div>
+                    <div class="setting-label">Manage Blocked Profiles</div>
+                    <div class="setting-description">View and unblock previously blocked profiles</div>
+                </div>
+                <button class="button" id="view-blocked-btn">View List</button>
+            </div>
+
+            <div class="blocked-profiles-section" id="blocked-profiles-section">
+                <div class="profiles-list" id="profiles-list">
+                    <div class="empty-profiles">
+                        No profiles blocked yet
+                    </div>
+                </div>
             </div>
         </div>
 
         <div class="section">
             <h2>Data Management</h2>
-
-            <div class="info">
-                <strong>Privacy Note:</strong> All data is stored locally in your browser.
-                No information is sent to external servers.
-            </div>
-
-            <div class="setting-item">
-                <div>
-                    <div class="setting-label">Blocked Profiles</div>
-                    <div class="setting-description">Manage your list of blocked profiles</div>
-                </div>
-                <button class="button" id="view-blocked-btn">View List</button>
-            </div>
-
             <div class="setting-item">
                 <div>
                     <div class="setting-label">Clear All Data</div>
@@ -275,15 +403,10 @@
                 </div>
                 <button class="button danger" id="clear-data-btn">Clear Data</button>
             </div>
-
-            <div class="warning">
-                <strong>Warning:</strong> Clearing data will remove all blocked profiles and reset
-                all settings to default. This action cannot be undone.
-            </div>
         </div>
 
         <div class="section">
-            <h2>About</h2>
+            <h2>Support & Information</h2>
 
             <div class="setting-item">
                 <div>
@@ -300,151 +423,23 @@
                 </div>
                 <button class="button" id="help-btn">Help</button>
             </div>
+
+            <!-- DEV: Test Page Button (Remove before publishing) -->
+            <div class="setting-item" id="test-page-section">
+                <div>
+                    <div class="setting-label">Test Page</div>
+                    <div class="setting-description">Open test page to debug extension functionality</div>
+                </div>
+                <button class="button" id="test-page-btn">Open Test Page</button>
+            </div>
         </div>
 
-        <button class="back-button" onclick="window.close()">
+        <button class="back-button" id="close-settings-btn">
             Close Settings
         </button>
     </div>
 
-    <script>
-        class SettingsManager {
-            constructor() {
-                this.settings = {
-                    isEnabled: true,
-                    showNotifications: true,
-                    blockOnlyFans: true,
-                    blockShorteners: true,
-                    blockAggregators: true
-                }
-                this.init()
-            }
-
-            async init() {
-                await this.loadSettings()
-                this.bindEvents()
-                this.updateUI()
-            }
-
-            async loadSettings() {
-                try {
-                    const result = await chrome.storage.sync.get([
-                        'isEnabled',
-                        'showNotifications',
-                        'blockOnlyFans',
-                        'blockShorteners',
-                        'blockAggregators'
-                    ])
-
-                    this.settings = {
-                        isEnabled: result.isEnabled !== undefined ? result.isEnabled : true,
-                        showNotifications: result.showNotifications !== undefined ? result.showNotifications : true,
-                        blockOnlyFans: result.blockOnlyFans !== undefined ? result.blockOnlyFans : true,
-                        blockShorteners: result.blockShorteners !== undefined ? result.blockShorteners : true,
-                        blockAggregators: result.blockAggregators !== undefined ? result.blockAggregators : true
-                    }
-                } catch (error) {
-                    console.error('Error loading settings:', error)
-                }
-            }
-
-            bindEvents() {
-                // Toggle buttons
-                document.getElementById('enable-toggle').addEventListener('click', () => {
-                    this.toggleSetting('isEnabled')
-                })
-
-                document.getElementById('notification-toggle').addEventListener('click', () => {
-                    this.toggleSetting('showNotifications')
-                })
-
-                document.getElementById('onlyfans-toggle').addEventListener('click', () => {
-                    this.toggleSetting('blockOnlyFans')
-                })
-
-                document.getElementById('shortener-toggle').addEventListener('click', () => {
-                    this.toggleSetting('blockShorteners')
-                })
-
-                document.getElementById('aggregator-toggle').addEventListener('click', () => {
-                    this.toggleSetting('blockAggregators')
-                })
-
-                // Action buttons
-                document.getElementById('view-blocked-btn').addEventListener('click', () => {
-                    this.viewBlockedProfiles()
-                })
-
-                document.getElementById('clear-data-btn').addEventListener('click', () => {
-                    this.clearAllData()
-                })
-
-                document.getElementById('help-btn').addEventListener('click', () => {
-                    this.openHelp()
-                })
-            }
-
-            updateUI() {
-                // Update toggles
-                document.getElementById('enable-toggle').classList.toggle('active', this.settings.isEnabled)
-                document.getElementById('notification-toggle').classList.toggle('active', this.settings.showNotifications)
-                document.getElementById('onlyfans-toggle').classList.toggle('active', this.settings.blockOnlyFans)
-                document.getElementById('shortener-toggle').classList.toggle('active', this.settings.blockShorteners)
-                document.getElementById('aggregator-toggle').classList.toggle('active', this.settings.blockAggregators)
-            }
-
-            async toggleSetting(setting) {
-                this.settings[setting] = !this.settings[setting]
-                await this.saveSettings()
-                this.updateUI()
-            }
-
-            async saveSettings() {
-                try {
-                    await chrome.storage.sync.set(this.settings)
-                } catch (error) {
-                    console.error('Error saving settings:', error)
-                }
-            }
-
-            viewBlockedProfiles() {
-                chrome.tabs.create({
-                    url: chrome.runtime.getURL('popup.html')
-                })
-            }
-
-            async clearAllData() {
-                if (confirm('Are you sure you want to clear all data? This action cannot be undone.')) {
-                    try {
-                        await chrome.storage.sync.clear()
-                        this.settings = {
-                            isEnabled: true,
-                            showNotifications: true,
-                            blockOnlyFans: true,
-                            blockShorteners: true,
-                            blockAggregators: true
-                        }
-                        this.updateUI()
-                        alert('All data has been cleared successfully.')
-                    } catch (error) {
-                        console.error('Error clearing data:', error)
-                        alert('Error clearing data. Please try again.')
-                    }
-                }
-            }
-
-            openHelp() {
-                chrome.tabs.create({
-                    url: chrome.runtime.getURL('help.html')
-                })
-            }
-        }
-
-        // Initialize settings
-        document.addEventListener('DOMContentLoaded', () => {
-            new SettingsManager()
-        })
-    </script>
+    <script src="settings.js"></script>
 </body>
 
 </html>

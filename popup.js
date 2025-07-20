@@ -81,12 +81,28 @@ class PopupManager {
             return
         }
 
-        profileList.innerHTML = this.blockedProfiles.map(username => `
-      <div class="profile-item">
-        <span class="profile-username">@${username}</span>
-        <button class="unblock-btn" data-username="${username}">Unblock</button>
-      </div>
-    `).join('')
+        // Check if blockedProfiles is an array of objects or strings
+        const isDetailed = this.blockedProfiles.length > 0 && typeof this.blockedProfiles[0] === 'object'
+
+        if (isDetailed) {
+            profileList.innerHTML = this.blockedProfiles.map(profile => `
+        <div class="profile-item">
+          <div class="profile-info">
+            <span class="profile-username">@${profile.username}</span>
+            <span class="profile-date">${profile.blockedDate || 'Recently blocked'}</span>
+          </div>
+          <button class="unblock-btn" data-username="${profile.username}">Unblock</button>
+        </div>
+      `).join('')
+        } else {
+            // Fallback for old format
+            profileList.innerHTML = this.blockedProfiles.map(username => `
+        <div class="profile-item">
+          <span class="profile-username">@${username}</span>
+          <button class="unblock-btn" data-username="${username}">Unblock</button>
+        </div>
+      `).join('')
+        }
 
         // Add event listeners to unblock buttons
         profileList.querySelectorAll('.unblock-btn').forEach(btn => {
