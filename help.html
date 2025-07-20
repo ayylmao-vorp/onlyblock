@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OnlyBlock Help</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f8f9fa;
+            color: #1a1a1a;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .logo {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: white;
+            font-weight: bold;
+        }
+
+        h1 {
+            font-size: 32px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 12px;
+        }
+
+        .subtitle {
+            font-size: 18px;
+            color: #666;
+        }
+
+        .section {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            font-size: 24px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+        }
+
+        h2::before {
+            content: '';
+            width: 4px;
+            height: 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 2px;
+            margin-right: 12px;
+        }
+
+        h3 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin: 20px 0 12px;
+        }
+
+        p {
+            margin-bottom: 16px;
+            color: #555;
+        }
+
+        .feature-list {
+            list-style: none;
+            margin: 16px 0;
+        }
+
+        .feature-list li {
+            padding: 8px 0;
+            padding-left: 24px;
+            position: relative;
+        }
+
+        .feature-list li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .code-block {
+            background: #f1f3f4;
+            border-radius: 6px;
+            padding: 12px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 14px;
+            margin: 12px 0;
+            overflow-x: auto;
+        }
+
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 6px;
+            padding: 16px;
+            margin: 16px 0;
+            color: #856404;
+        }
+
+        .info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            border-radius: 6px;
+            padding: 16px;
+            margin: 16px 0;
+            color: #0c5460;
+        }
+
+        .back-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: transform 0.2s;
+            margin-top: 20px;
+        }
+
+        .back-button:hover {
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">OB</div>
+            <h1>OnlyBlock Help</h1>
+            <p class="subtitle">Everything you need to know about using OnlyBlock</p>
+        </div>
+
+        <div class="section">
+            <h2>What is OnlyBlock?</h2>
+            <p>
+                OnlyBlock is a browser extension that automatically detects and blocks X.com (Twitter)
+                profiles that contain OnlyFans links in their bio. It helps keep your timeline clean
+                and focused by removing unwanted content.
+            </p>
+        </div>
+
+        <div class="section">
+            <h2>How it Works</h2>
+            <p>
+                OnlyBlock scans X.com pages for user profiles and checks their bio text for common
+                OnlyFans link patterns. When detected, the profile is automatically hidden from view.
+            </p>
+
+            <h3>Detected Link Patterns:</h3>
+            <ul class="feature-list">
+                <li>onlyfans.com</li>
+                <li>onlyfans.co</li>
+                <li>of.ly</li>
+                <li>fans.ly</li>
+                <li>Linktree pages containing OnlyFans</li>
+                <li>Bio.link pages containing OnlyFans</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>Getting Started</h2>
+            <ol>
+                <li><strong>Install the Extension:</strong> OnlyBlock should already be installed in your browser.</li>
+                <li><strong>Enable Blocking:</strong> Click the OnlyBlock icon in your browser toolbar and toggle the
+                    switch to "ON".</li>
+                <li><strong>Visit X.com:</strong> Navigate to any X.com page to see OnlyBlock in action.</li>
+                <li><strong>Automatic Detection:</strong> Profiles with OnlyFans links will be automatically hidden.
+                </li>
+            </ol>
+        </div>
+
+        <div class="section">
+            <h2>Managing Blocked Profiles</h2>
+            <p>
+                You can view and manage all blocked profiles through the extension popup:
+            </p>
+            <ul class="feature-list">
+                <li>Click the OnlyBlock icon in your browser toolbar</li>
+                <li>View the list of blocked profiles</li>
+                <li>Click "Unblock" next to any profile to restore it</li>
+                <li>Toggle the extension on/off as needed</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>Settings & Customization</h2>
+            <p>
+                OnlyBlock is designed to work out of the box with sensible defaults.
+                The extension automatically:
+            </p>
+            <ul class="feature-list">
+                <li>Saves your blocked profiles across browser sessions</li>
+                <li>Remembers your enable/disable preference</li>
+                <li>Works on both x.com and twitter.com domains</li>
+                <li>Updates in real-time as you browse</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>Troubleshooting</h2>
+
+            <h3>Extension Not Working?</h3>
+            <ul class="feature-list">
+                <li>Make sure the extension is enabled in the popup</li>
+                <li>Refresh the X.com page</li>
+                <li>Check that you're on x.com or twitter.com</li>
+                <li>Try disabling and re-enabling the extension</li>
+            </ul>
+
+            <h3>Profiles Not Being Blocked?</h3>
+            <div class="info">
+                <strong>Note:</strong> OnlyBlock only detects profiles that are currently visible on the page.
+                If you're not seeing blocked profiles, try scrolling to load more content or navigating
+                to different pages.
+            </div>
+
+            <h3>False Positives?</h3>
+            <div class="warning">
+                <strong>Important:</strong> OnlyBlock uses pattern matching to detect OnlyFans links.
+                In rare cases, legitimate content might be flagged. You can always unblock profiles
+                manually through the popup.
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Privacy & Data</h2>
+            <p>
+                OnlyBlock respects your privacy:
+            </p>
+            <ul class="feature-list">
+                <li>All data is stored locally in your browser</li>
+                <li>No data is sent to external servers</li>
+                <li>Blocked profiles are only stored in your browser's sync storage</li>
+                <li>You can clear all data by uninstalling the extension</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>Support</h2>
+            <p>
+                If you need help or have suggestions for improving OnlyBlock:
+            </p>
+            <ul class="feature-list">
+                <li>Check this help page for common issues</li>
+                <li>Review the extension settings</li>
+                <li>Try refreshing the page or restarting your browser</li>
+            </ul>
+        </div>
+
+        <button class="back-button" onclick="window.close()">
+            Close Help
+        </button>
+    </div>
+</body>
+
+</html>

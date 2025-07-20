@@ -1,0 +1,39 @@
+{
+    "manifest_version": 3,
+    "name": "OnlyBlock",
+    "version": "1.0.0",
+    "description": "Blocks X.com profiles that contain OnlyFans links in their bio",
+    "permissions": [
+        "storage",
+        "activeTab",
+        "scripting"
+    ],
+    "host_permissions": [
+        "https://x.com/*",
+        "https://twitter.com/*"
+    ],
+    "content_scripts": [
+        {
+            "matches": [
+                "https://x.com/*",
+                "https://twitter.com/*"
+            ],
+            "js": [
+                "content.js"
+            ],
+            "run_at": "document_end"
+        }
+    ],
+    "background": {
+        "service_worker": "background.js"
+    },
+    "action": {
+        "default_popup": "popup.html",
+        "default_title": "OnlyBlock"
+    },
+    "icons": {
+        "16": "icons/icon16.png",
+        "48": "icons/icon48.png",
+        "128": "icons/icon128.png"
+    }
+}
