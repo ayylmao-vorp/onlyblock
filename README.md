@@ -33,8 +33,9 @@ A browser extension that automatically blocks X.com (Twitter) profiles containin
 1. Download or clone this repository
 2. Open Firefox and navigate to `about:debugging`
 3. Click "This Firefox" in the sidebar
-4. Click "Load Temporary Add-on" and select the `manifest-firefox.json` file
-5. **Note**: Firefox uses manifest v3 with background scripts, while Chrome uses service workers
+4. Rename `manifest.json` to `manifest-chrome.json` `manifest-firefox.json` to `manifest.json` - only one manifest file can be in the root of the project
+5. Click "Load Temporary Add-on" and select the `manifest-firefox.json` file
+6. **Note**: Firefox uses manifest v3 with background scripts, while Chrome uses service workers
 
 ## How It Works
 
