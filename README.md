@@ -1,5 +1,7 @@
 # OnlyBlock
 
+Author: pepeskoper@gmail.com
+
 A browser extension that automatically blocks X.com (Twitter) profiles containing OnlyFans links in their bio.
 
 ## Features
