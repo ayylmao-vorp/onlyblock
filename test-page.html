@@ -58,6 +58,8 @@
 
     <h1>OnlyBlock Test Page</h1>
     <p>This page simulates X.com content to test the OnlyBlock extension.</p>
+    <p><strong>Note:</strong> Twitter block functionality requires you to be on actual X.com pages. This test page only
+        tests visual hiding.</p>
 
     <!-- Test Profile 1: Has OnlyFans link -->
     <div class="tweet" data-testid="tweet">
@@ -89,7 +91,37 @@
         </div>
     </div>
 
-    <!-- Test Profile 4: Clean profile -->
+    <!-- Test Profile 4: Adult content keywords -->
+    <div class="tweet" data-testid="tweet">
+        <div class="user-info">
+            <a href="https://twitter.com/testuser4" class="username" data-testid="User-Name">@testuser4</a>
+        </div>
+        <div class="bio" data-testid="UserDescription">
+            Exclusive adult content creator, DM for more
+        </div>
+    </div>
+
+    <!-- Test Profile 5: Escort services -->
+    <div class="tweet" data-testid="tweet">
+        <div class="user-info">
+            <a href="https://twitter.com/testuser5" class="username" data-testid="User-Name">@testuser5</a>
+        </div>
+        <div class="bio" data-testid="UserDescription">
+            Discreet companion services, outcall available
+        </div>
+    </div>
+
+    <!-- Test Profile 6: Massage services -->
+    <div class="tweet" data-testid="tweet">
+        <div class="user-info">
+            <a href="https://twitter.com/testuser6" class="username" data-testid="User-Name">@testuser6</a>
+        </div>
+        <div class="bio" data-testid="UserDescription">
+            Therapeutic massage with happy ending
+        </div>
+    </div>
+
+    <!-- Test Profile 7: Clean profile -->
     <div class="tweet" data-testid="tweet">
         <div class="user-info">
             <a href="https://twitter.com/cleanuser" class="username" data-testid="User-Name">@cleanuser</a>
@@ -99,30 +131,7 @@
         </div>
     </div>
 
-    <script>
-        // Update status
-        function updateStatus(message) {
-            document.getElementById('status').textContent = message
-        }
-
-        // Check if extension is loaded
-        setTimeout(() => {
-            if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.id) {
-                updateStatus('Extension detected')
-            } else {
-                updateStatus('No extension detected')
-            }
-        }, 1000)
-
-        // Listen for console messages
-        const originalLog = console.log
-        console.log = function (...args) {
-            if (args[0] && args[0].includes('OnlyBlock')) {
-                updateStatus('OnlyBlock: ' + args.join(' '))
-            }
-            originalLog.apply(console, args)
-        }
-    </script>
+    <script src="test-page.js"></script>
 </body>
 
 </html>

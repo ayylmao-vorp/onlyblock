@@ -74,12 +74,16 @@ function removeTestPageFeatures() {
     })
 }
 
-// Remove test page file
-function removeTestPageFile() {
-    if (fs.existsSync('test-page.html')) {
-        fs.unlinkSync('test-page.html')
-        console.log('✅ Removed test-page.html')
-    }
+// Remove test page files
+function removeTestPageFiles() {
+    const testFiles = ['test-page.html', 'test-page.js']
+
+    testFiles.forEach(file => {
+        if (fs.existsSync(file)) {
+            fs.unlinkSync(file)
+            console.log(`✅ Removed ${file}`)
+        }
+    })
 }
 
 // Remove this build script
@@ -93,13 +97,13 @@ function removeBuildScript() {
 // Main build process
 try {
     removeTestPageFeatures()
-    removeTestPageFile()
+    removeTestPageFiles()
     removeBuildScript()
 
     console.log('🎉 Build complete! Extension is ready for store publishing.')
     console.log('📦 Files cleaned:')
     console.log('   - Removed test page button from settings')
-    console.log('   - Removed test page file')
+    console.log('   - Removed test page files (HTML and JS)')
     console.log('   - Removed test page references from manifests')
     console.log('   - Removed build script')
 

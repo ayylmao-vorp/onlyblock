@@ -36,23 +36,51 @@ class PopupManager {
             // Get current tab
             const [tab] = await chrome.tabs.query({ active: true, currentWindow: true })
 
-            if (tab && (tab.url.includes('x.com') || tab.url.includes('twitter.com'))) {
-                // Get status from content script
-                const response = await chrome.tabs.sendMessage(tab.id, { action: 'getStatus' })
-                this.isEnabled = response.isEnabled
-                this.blockedProfiles = response.blockedProfiles || []
-            } else {
-                // Get status from storage
-                const result = await chrome.storage.sync.get(['isEnabled', 'blockedProfiles'])
-                this.isEnabled = result.isEnabled !== undefined ? result.isEnabled : true
-                this.blockedProfiles = result.blockedProfiles || []
+            if (tab && (tab.url.includes('x.com') || tab.url.includes('twitter.com') || tab.url.includes('file://'))) {
+                // Try to get status from content script with timeout
+                try {
+                    const response = await Promise.race([
+                        chrome.tabs.sendMessage(tab.id, { action: 'getStatus' }),
+                        new Promise((_, reject) =>
+                            setTimeout(() => reject(new Error('Timeout')), 1000)
+                        )
+                    ])
+
+                    if (response && response.isEnabled !== undefined) {
+                        this.isEnabled = response.isEnabled
+                        this.blockedProfiles = response.blockedProfiles || []
+                        console.log('Status loaded from content script')
+                        return
+                    }
+                } catch (contentScriptError) {
+                    console.log('Content script not available, trying background script:', contentScriptError.message)
+
+                    // Try background script as fallback
+                    try {
+                        const response = await chrome.runtime.sendMessage({ action: 'getStatus' })
+                        if (response && response.isEnabled !== undefined) {
+                            this.isEnabled = response.isEnabled
+                            this.blockedProfiles = response.blockedProfiles || []
+                            console.log('Status loaded from background script')
+                            return
+                        }
+                    } catch (backgroundError) {
+                        console.log('Background script not available, using storage fallback:', backgroundError.message)
+                    }
+                }
             }
-        } catch (error) {
-            console.error('Error loading status:', error)
+
             // Fallback to storage
             const result = await chrome.storage.sync.get(['isEnabled', 'blockedProfiles'])
             this.isEnabled = result.isEnabled !== undefined ? result.isEnabled : true
             this.blockedProfiles = result.blockedProfiles || []
+            console.log('Status loaded from storage')
+
+        } catch (error) {
+            console.error('Error loading status:', error)
+            // Final fallback with default values
+            this.isEnabled = true
+            this.blockedProfiles = []
         }
     }
 
@@ -120,12 +148,22 @@ class PopupManager {
             // Get current tab
             const [tab] = await chrome.tabs.query({ active: true, currentWindow: true })
 
-            if (tab && (tab.url.includes('x.com') || tab.url.includes('twitter.com'))) {
-                // Send to content script
-                await chrome.tabs.sendMessage(tab.id, {
-                    action: 'toggleEnabled',
-                    enabled: this.isEnabled
-                })
+            if (tab && (tab.url.includes('x.com') || tab.url.includes('twitter.com') || tab.url.includes('file://'))) {
+                // Try to send to content script with timeout
+                try {
+                    await Promise.race([
+                        chrome.tabs.sendMessage(tab.id, {
+                            action: 'toggleEnabled',
+                            enabled: this.isEnabled
+                        }),
+                        new Promise((_, reject) =>
+                            setTimeout(() => reject(new Error('Timeout')), 1000)
+                        )
+                    ])
+                    console.log('Toggle sent to content script')
+                } catch (contentScriptError) {
+                    console.log('Content script not available for toggle:', contentScriptError.message)
+                }
             }
         } catch (error) {
             console.error('Error toggling enabled:', error)
@@ -142,19 +180,38 @@ class PopupManager {
             // Get current tab
             const [tab] = await chrome.tabs.query({ active: true, currentWindow: true })
 
-            if (tab && (tab.url.includes('x.com') || tab.url.includes('twitter.com'))) {
-                // Send to content script
-                await chrome.tabs.sendMessage(tab.id, {
-                    action: 'unblockProfile',
-                    username: username
-                })
+            if (tab && (tab.url.includes('x.com') || tab.url.includes('twitter.com') || tab.url.includes('file://'))) {
+                // Try to send to content script with timeout
+                try {
+                    await Promise.race([
+                        chrome.tabs.sendMessage(tab.id, {
+                            action: 'unblockProfile',
+                            username: username
+                        }),
+                        new Promise((_, reject) =>
+                            setTimeout(() => reject(new Error('Timeout')), 1000)
+                        )
+                    ])
+                    console.log('Unblock sent to content script')
+                } catch (contentScriptError) {
+                    console.log('Content script not available for unblock:', contentScriptError.message)
+                }
             }
         } catch (error) {
             console.error('Error unblocking profile:', error)
         }
 
-        // Remove from local list
-        this.blockedProfiles = this.blockedProfiles.filter(u => u !== username)
+        // Remove from local list and storage
+        this.blockedProfiles = this.blockedProfiles.filter(p => {
+            if (typeof p === 'object') {
+                return p.username !== username
+            } else {
+                return p !== username
+            }
+        })
+
+        // Update storage
+        await chrome.storage.sync.set({ blockedProfiles: this.blockedProfiles })
 
         this.updateUI()
     }

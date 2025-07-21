@@ -27,10 +27,14 @@ class OnlyBlock {
 
     async loadSettings() {
         try {
-            const result = await chrome.storage.sync.get(['isEnabled', 'blockedProfiles', 'blockPhrases'])
+            const result = await chrome.storage.sync.get(['isEnabled', 'useTwitterBlock', 'blockedProfiles', 'blockPhrases'])
+
             this.isEnabled = result.isEnabled !== undefined ? result.isEnabled : true
+            this.useTwitterBlock = result.useTwitterBlock !== undefined ? result.useTwitterBlock : true
             this.blockedProfiles = new Set(result.blockedProfiles || [])
             this.blockPhrases = result.blockPhrases !== undefined ? result.blockPhrases : true
+
+            console.log('OnlyBlock: Settings loaded - Twitter block:', this.useTwitterBlock)
         } catch (error) {
             console.error('OnlyBlock: Error loading settings:', error)
         }
@@ -40,6 +44,7 @@ class OnlyBlock {
         try {
             await chrome.storage.sync.set({
                 isEnabled: this.isEnabled,
+                useTwitterBlock: this.useTwitterBlock,
                 blockedProfiles: Array.from(this.blockedProfiles),
                 blockPhrases: this.blockPhrases
             })
@@ -123,11 +128,12 @@ class OnlyBlock {
             element.querySelectorAll(profileSelectors.join(', ')) :
             []
 
-        console.log('OnlyBlock: Found', profileElements.length, 'profile elements')
-
-        profileElements.forEach((profileElement) => {
-            this.checkProfile(profileElement)
-        })
+        if (profileElements.length > 0) {
+            console.log('OnlyBlock: Found', profileElements.length, 'profile elements')
+            profileElements.forEach((profileElement) => {
+                this.checkProfile(profileElement)
+            })
+        }
 
         // Also scan the element itself if it's a profile
         if (element.matches && element.matches(profileSelectors.join(', '))) {
@@ -146,11 +152,12 @@ class OnlyBlock {
             element.querySelectorAll(tweetSelectors.join(', ')) :
             []
 
-        console.log('OnlyBlock: Found', tweetElements.length, 'tweet elements')
-
-        tweetElements.forEach((tweetElement) => {
-            this.checkTweet(tweetElement)
-        })
+        if (tweetElements.length > 0) {
+            console.log('OnlyBlock: Found', tweetElements.length, 'tweet elements')
+            tweetElements.forEach((tweetElement) => {
+                this.checkTweet(tweetElement)
+            })
+        }
 
         // Also scan the element itself if it's a tweet
         if (element.matches && element.matches(tweetSelectors.join(', '))) {
@@ -165,8 +172,6 @@ class OnlyBlock {
         const profileContainer = this.findProfileContainer(profileElement)
         if (!profileContainer) return
 
-        console.log('OnlyBlock: Checking profile element:', profileContainer)
-
         // Get username - try multiple selectors
         const usernameSelectors = [
             '[data-testid="User-Name"] a',
@@ -180,27 +185,21 @@ class OnlyBlock {
         for (const selector of usernameSelectors) {
             usernameElement = profileContainer.querySelector(selector)
             if (usernameElement) {
-                console.log('OnlyBlock: Found username element with selector:', selector)
                 break
             }
         }
 
         if (!usernameElement) {
-            console.log('OnlyBlock: No username element found')
             return
         }
 
         const username = this.extractUsername(usernameElement.href)
         if (!username) {
-            console.log('OnlyBlock: Could not extract username from:', usernameElement.href)
             return
         }
 
-        console.log('OnlyBlock: Checking profile for username:', username)
-
         // Check if already blocked
         if (this.blockedProfiles.has(username)) {
-            console.log('OnlyBlock: Profile already blocked:', username)
             this.hideProfile(profileContainer)
             return
         }
@@ -217,23 +216,38 @@ class OnlyBlock {
         for (const selector of bioSelectors) {
             bioElement = profileContainer.querySelector(selector)
             if (bioElement) {
-                console.log('OnlyBlock: Found bio element with selector:', selector)
                 break
             }
         }
 
         if (!bioElement) {
-            console.log('OnlyBlock: No bio element found')
             return
         }
 
-        console.log('OnlyBlock: Bio text content:', bioElement.textContent)
-
         if (this.containsOnlyFansLink(bioElement.textContent)) {
-            console.log('OnlyBlock: Found OnlyFans link in profile:', username, bioElement.textContent)
-            this.blockProfile(username, profileContainer)
-        } else {
-            console.log('OnlyBlock: No OnlyFans link found in bio')
+            console.log('OnlyBlock: Found OnlyFans content in profile:', username)
+
+            // Determine specific reason for blocking
+            let reason = 'OnlyFans content detected'
+            const bioText = bioElement.textContent.toLowerCase()
+
+            if (bioText.includes('onlyfans.com') || bioText.includes('onlyfans.co')) {
+                reason = 'OnlyFans link detected'
+            } else if (bioText.includes('fansly')) {
+                reason = 'Fansly content detected'
+            } else if (bioText.includes('my free of') || bioText.includes('free of')) {
+                reason = 'OnlyFans keyword detected'
+            } else if (bioText.includes('adult content') || bioText.includes('nsfw')) {
+                reason = 'Adult content detected'
+            } else if (bioText.includes('escort') || bioText.includes('companion')) {
+                reason = 'Escort services detected'
+            } else if (bioText.includes('massage') || bioText.includes('therapeutic')) {
+                reason = 'Massage services detected'
+            } else {
+                reason = 'Adult entertainment content detected'
+            }
+
+            this.blockProfile(username, profileContainer, reason)
         }
     }
 
@@ -264,7 +278,6 @@ class OnlyBlock {
 
     extractUsername(href) {
         if (!href) return null
-        console.log('OnlyBlock: Extracting username from:', href)
 
         // Try multiple patterns for different URL formats
         const patterns = [
@@ -276,36 +289,71 @@ class OnlyBlock {
         for (const pattern of patterns) {
             const match = href.match(pattern)
             if (match) {
-                console.log('OnlyBlock: Extracted username:', match[1])
                 return match[1]
             }
         }
 
-        console.log('OnlyBlock: Could not extract username from URL')
+        return null
+    }
+
+    extractUsernameFromUrl(url) {
+        if (!url) return null
+
+        // Try multiple patterns for different URL formats
+        const patterns = [
+            /twitter\.com\/([^\/\?]+)/,
+            /x\.com\/([^\/\?]+)/,
+            /\/([^\/\?]+)$/ // Just get the last part of the URL
+        ]
+
+        for (const pattern of patterns) {
+            const match = url.match(pattern)
+            if (match) {
+                return match[1]
+            }
+        }
+
         return null
     }
 
     containsOnlyFansLink(text) {
         if (!text) return false
 
-        const onlyFansPatterns = [
+        // Link patterns
+        const linkPatterns = [
             /onlyfans\.com/i,
             /onlyfans\.co/i,
             /of\.ly/i,
             /fans\.ly/i,
             /linktr\.ee.*onlyfans/i,
             /bio\.link.*onlyfans/i,
-            /onlyfans/i, // Just the word "onlyfans"
-            /fansly/i, // Fansly alternative
-            /myfreeof/i, // "my free of" phrase
-            /free\s*of/i // "free of" phrase
+            /fansly\.com/i,
+            /fansly\.co/i
         ]
 
-        const hasMatch = onlyFansPatterns.some(pattern => pattern.test(text))
-        if (hasMatch) {
+        // Keyword patterns (user-specified OnlyFans-related terms)
+        const keywordPatterns = [
+            /sexy\s*new\s*content/i,
+            /come\s*check\s*out\s*all\s*my\s*new\s*photos/i,
+            /come\s*check\s*out\s*all\s*my\s*new\s*videos/i,
+            /hottest\s*content\s*to\s*offer/i
+        ]
+
+        // Check for link patterns
+        const hasLinkMatch = linkPatterns.some(pattern => pattern.test(text))
+        if (hasLinkMatch) {
             console.log('OnlyBlock: Detected OnlyFans link in text:', text)
+            return true
         }
-        return hasMatch
+
+        // Check for keyword patterns
+        const hasKeywordMatch = keywordPatterns.some(pattern => pattern.test(text))
+        if (hasKeywordMatch) {
+            console.log('OnlyBlock: Detected OnlyFans keyword in text:', text)
+            return true
+        }
+
+        return false
     }
 
     containsBlockedPhrase(text) {
@@ -319,8 +367,8 @@ class OnlyBlock {
         return blockedPhrases.some(phrase => phrase.test(text))
     }
 
-    async blockProfile(username, profileElement) {
-        console.log('OnlyBlock: Blocking profile:', username)
+    async blockProfile(username, profileElement, reason = 'OnlyFans content detected') {
+        console.log('OnlyBlock: Blocking profile:', username, 'Reason:', reason)
 
         this.blockedProfiles.add(username)
 
@@ -328,7 +376,7 @@ class OnlyBlock {
         const profileInfo = {
             username: username,
             blockedDate: new Date().toLocaleDateString(),
-            reason: 'OnlyFans link detected'
+            reason: reason
         }
 
         // Get existing blocked profiles
@@ -339,27 +387,252 @@ class OnlyBlock {
         if (!blockedProfiles.find(p => p.username === username)) {
             blockedProfiles.push(profileInfo)
             await chrome.storage.sync.set({ blockedProfiles })
-            console.log('OnlyBlock: Added profile to blocked list')
         }
 
         await this.saveSettings()
         this.hideProfile(profileElement)
 
+        // Use Twitter's native block if enabled
+        if (this.useTwitterBlock) {
+            console.log('OnlyBlock: Twitter block enabled, attempting to block:', username)
+            await this.twitterBlockUser(username)
+        }
+
         // Show notification
         this.showBlockNotification(username)
+    }
 
-        console.log('OnlyBlock: Profile blocked successfully:', username)
+    // Helper sleep function
+    sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms))
+    }
+
+    async twitterBlockUser(username) {
+        try {
+            console.log('OnlyBlock: Attempting UI block for:', username)
+            // 1. Navigate to the user's profile if not already there
+            const profileUrl = `https://x.com/${username}`
+            if (!window.location.pathname.includes(username)) {
+                window.location.href = profileUrl
+                console.log('OnlyBlock: Navigating to profile:', profileUrl)
+                await this.sleep(2500) // Wait for navigation and DOM to load
+            } else {
+                console.log('OnlyBlock: Already on profile page')
+            }
+
+            // 2. Wait for the profile header to appear
+            let attempts = 0
+            while (!document.querySelector('header') && attempts < 10) {
+                await this.sleep(300)
+                attempts++
+            }
+            if (!document.querySelector('header')) {
+                console.log('OnlyBlock: Profile header not found, aborting block')
+                return
+            }
+
+            // 3. Find and click the 3-dot menu (More actions)
+            let moreBtn = document.querySelector('[aria-label="More"]') ||
+                document.querySelector('div[aria-label="More"]') ||
+                document.querySelector('div[role="button"][aria-label*="More"]')
+            if (!moreBtn) {
+                // Try to find by SVG (three dots)
+                moreBtn = Array.from(document.querySelectorAll('div[role="button"]')).find(el => {
+                    return el.innerHTML.includes('svg') && el.getAttribute('aria-label') && el.getAttribute('aria-label').toLowerCase().includes('more')
+                })
+            }
+            if (!moreBtn) {
+                console.log('OnlyBlock: Could not find 3-dot menu (More actions) button')
+                return
+            }
+            moreBtn.click()
+            console.log('OnlyBlock: Clicked 3-dot menu')
+
+            // 4. Wait for the dropdown menu to appear
+            await this.sleep(500)
+
+            // 5. Find and click the "Block" menu item
+            let blockBtn = Array.from(document.querySelectorAll('div[role="menuitem"]'))
+                .find(el => el.textContent && el.textContent.match(/block/i))
+            if (!blockBtn) {
+                console.log('OnlyBlock: Could not find Block menu item')
+                return
+            }
+            blockBtn.click()
+            console.log('OnlyBlock: Clicked Block menu item')
+
+            // 6. Wait for the confirmation dialog
+            await this.sleep(500)
+
+            // 7. Find and click the confirmation "Block" button
+            let confirmBtn = Array.from(document.querySelectorAll('div[role="button"], button'))
+                .find(el => el.textContent && el.textContent.trim().toLowerCase() === 'block')
+            if (!confirmBtn) {
+                console.log('OnlyBlock: Could not find confirmation Block button')
+                return
+            }
+            confirmBtn.click()
+            console.log('OnlyBlock: User blocked via UI')
+        } catch (error) {
+            console.error('OnlyBlock: Error blocking user via UI:', error)
+        }
+    }
+
+    async findAndClickBlockButton(username) {
+        try {
+            // Look for block button in current page
+            const blockButton = this.findBlockButton()
+
+            if (blockButton) {
+                console.log('OnlyBlock: Found block button, clicking...')
+                blockButton.click()
+
+                // Wait for confirmation dialog
+                await this.waitForBlockConfirmation()
+
+                console.log('OnlyBlock: Successfully blocked user on Twitter:', username)
+                return
+            }
+
+            console.log('OnlyBlock: Block button not found, user may need to manually block:', username)
+
+        } catch (error) {
+            console.error('OnlyBlock: Error finding block button:', error)
+        }
+    }
+
+    findBlockButton() {
+        console.log('OnlyBlock: Searching for block button...')
+
+        // Look for block button with various selectors
+        const blockSelectors = [
+            // Primary selectors
+            '[data-testid="block"]',
+            'button[data-testid="block"]',
+            'div[role="button"][data-testid="block"]',
+
+            // Aria label selectors
+            '[aria-label*="block"]',
+            '[aria-label*="Block"]',
+            'button[aria-label*="block"]',
+            'button[aria-label*="Block"]',
+
+            // Menu item selectors
+            'div[role="menuitem"][data-testid="block"]',
+            'div[role="menuitem"] span[data-testid="block"]',
+
+            // User actions selectors
+            '[data-testid="userActions"] [data-testid="block"]',
+            '[data-testid="userActions"] button[aria-label*="block"]',
+            '[data-testid="userActions"] button[aria-label*="Block"]',
+
+            // More specific selectors
+            '[data-testid="userActions"] div[role="menuitem"][data-testid="block"]',
+            '[data-testid="userActions"] div[role="menuitem"] span[data-testid="block"]',
+
+            // Generic button selectors that might contain "block"
+            'button[data-testid*="block"]',
+            'div[role="button"][data-testid*="block"]'
+        ]
+
+        console.log('OnlyBlock: Checking', blockSelectors.length, 'block button selectors...')
+
+        for (let i = 0; i < blockSelectors.length; i++) {
+            const selector = blockSelectors[i]
+            const button = document.querySelector(selector)
+            if (button) {
+                console.log('OnlyBlock: Found block button with selector:', selector)
+                console.log('OnlyBlock: Button text:', button.textContent?.trim())
+                console.log('OnlyBlock: Button aria-label:', button.getAttribute('aria-label'))
+                return button
+            }
+        }
+
+        // If no block button found, log all buttons on page for debugging
+        console.log('OnlyBlock: No block button found. Available buttons:')
+        document.querySelectorAll('button, div[role="button"]').forEach(button => {
+            const text = button.textContent?.trim()
+            const ariaLabel = button.getAttribute('aria-label')
+            const dataTestId = button.getAttribute('data-testid')
+            if (text || ariaLabel || dataTestId) {
+                console.log('OnlyBlock: - Button:', text || ariaLabel || dataTestId, 'data-testid:', dataTestId)
+            }
+        })
+
+        return null
+    }
+
+    async waitForBlockConfirmation() {
+        console.log('OnlyBlock: Waiting for confirmation dialog...')
+        // Wait for confirmation dialog and click confirm
+        return new Promise((resolve) => {
+            let attempts = 0
+            const maxAttempts = 50 // 5 seconds max wait
+
+            const checkForConfirmation = () => {
+                attempts++
+
+                const confirmSelectors = [
+                    // Primary confirmation selectors
+                    '[data-testid="confirmationSheetConfirm"]',
+                    '[data-testid="confirmationSheetConfirmButton"]',
+                    'button[data-testid="confirmationSheetConfirm"]',
+                    'button[data-testid="confirmationSheetConfirmButton"]',
+                    'div[role="button"][data-testid="confirmationSheetConfirm"]',
+                    'div[role="button"][data-testid="confirmationSheetConfirmButton"]',
+
+                    // Generic confirm buttons
+                    'button[data-testid*="confirm"]',
+                    'button[aria-label*="confirm"]',
+                    'button[aria-label*="Confirm"]',
+                    'button[aria-label*="confirm"]',
+
+                    // Modal/dialog buttons
+                    '[data-testid="confirmationSheet"] button',
+                    '[data-testid="confirmationSheet"] div[role="button"]',
+                    '[role="dialog"] button',
+                    '[role="dialog"] div[role="button"]'
+                ]
+
+                for (const selector of confirmSelectors) {
+                    const confirmButton = document.querySelector(selector)
+                    if (confirmButton) {
+                        console.log('OnlyBlock: Found confirmation button with selector:', selector)
+                        console.log('OnlyBlock: Confirmation button text:', confirmButton.textContent?.trim())
+                        confirmButton.click()
+                        console.log('OnlyBlock: Clicked confirmation button')
+                        resolve()
+                        return
+                    }
+                }
+
+                if (attempts >= maxAttempts) {
+                    console.log('OnlyBlock: Timeout waiting for confirmation dialog')
+                    console.log('OnlyBlock: Available buttons on page:')
+                    document.querySelectorAll('button, div[role="button"]').forEach(button => {
+                        const text = button.textContent?.trim()
+                        const ariaLabel = button.getAttribute('aria-label')
+                        const dataTestId = button.getAttribute('data-testid')
+                        if (text || ariaLabel || dataTestId) {
+                            console.log('OnlyBlock: - Button:', text || ariaLabel || dataTestId, 'data-testid:', dataTestId)
+                        }
+                    })
+                    resolve() // Resolve anyway to not hang
+                    return
+                }
+
+                // Check again after a short delay
+                setTimeout(checkForConfirmation, 100)
+            }
+
+            checkForConfirmation()
+        })
     }
 
     hideProfile(profileElement) {
-        console.log('OnlyBlock: Hiding profile element:', profileElement)
-
         if (profileElement && !profileElement.classList.contains('onlyblock-hidden')) {
             profileElement.classList.add('onlyblock-hidden')
             profileElement.style.display = 'none'
-            console.log('OnlyBlock: Profile hidden successfully')
-        } else {
-            console.log('OnlyBlock: Profile already hidden or invalid element')
         }
     }
 
@@ -453,6 +726,11 @@ class OnlyBlock {
 
         await this.saveSettings()
 
+        // Unblock on Twitter if enabled
+        if (this.useTwitterBlock) {
+            await this.twitterUnblockUser(username)
+        }
+
         // Show the profile again
         document.querySelectorAll('.onlyblock-hidden').forEach(el => {
             const usernameElement = el.querySelector('[data-testid="User-Name"] a, [data-testid="UserName"] a')
@@ -463,12 +741,89 @@ class OnlyBlock {
         })
     }
 
+    async twitterUnblockUser(username) {
+        try {
+            console.log('OnlyBlock: Attempting to unblock user on Twitter:', username)
+
+            // Find unblock button
+            const unblockButton = this.findUnblockButton()
+
+            if (unblockButton) {
+                console.log('OnlyBlock: Found unblock button, clicking...')
+                unblockButton.click()
+
+                // Wait for confirmation dialog
+                await this.waitForUnblockConfirmation()
+
+                console.log('OnlyBlock: Successfully unblocked user on Twitter:', username)
+                return
+            }
+
+            console.log('OnlyBlock: Unblock button not found, user may need to manually unblock:', username)
+
+        } catch (error) {
+            console.error('OnlyBlock: Error unblocking user on Twitter:', error)
+        }
+    }
+
+    findUnblockButton() {
+        // Look for unblock button with various selectors
+        const unblockSelectors = [
+            '[data-testid="unblock"]',
+            '[aria-label*="unblock"]',
+            '[aria-label*="Unblock"]',
+            'button[data-testid="unblock"]',
+            'div[role="button"][data-testid="unblock"]',
+            'button[aria-label*="unblock"]',
+            'button[aria-label*="Unblock"]'
+        ]
+
+        for (const selector of unblockSelectors) {
+            const button = document.querySelector(selector)
+            if (button) {
+                console.log('OnlyBlock: Found unblock button with selector:', selector)
+                return button
+            }
+        }
+
+        return null
+    }
+
+    async waitForUnblockConfirmation() {
+        // Wait for confirmation dialog and click confirm
+        return new Promise((resolve) => {
+            const checkForConfirmation = () => {
+                const confirmSelectors = [
+                    '[data-testid="confirmationSheetConfirm"]',
+                    '[data-testid="confirmationSheetConfirmButton"]',
+                    'button[data-testid="confirmationSheetConfirm"]',
+                    'div[role="button"][data-testid="confirmationSheetConfirm"]'
+                ]
+
+                for (const selector of confirmSelectors) {
+                    const confirmButton = document.querySelector(selector)
+                    if (confirmButton) {
+                        console.log('OnlyBlock: Found unblock confirmation button, clicking...')
+                        confirmButton.click()
+                        resolve()
+                        return
+                    }
+                }
+
+                // Check again after a short delay
+                setTimeout(checkForConfirmation, 100)
+            }
+
+            checkForConfirmation()
+        })
+    }
+
     getBlockedProfiles() {
         return Array.from(this.blockedProfiles)
     }
 
     handleSettingChange(setting, value) {
-        console.log('Setting changed:', setting, value)
+        console.log('OnlyBlock: Setting changed:', setting, '=', value)
 
         switch (setting) {
             case 'isEnabled':
@@ -482,6 +837,11 @@ class OnlyBlock {
                         el.style.display = ''
                     })
                 }
+                break
+
+            case 'useTwitterBlock':
+                this.useTwitterBlock = value
+                console.log('OnlyBlock: Twitter block setting updated to:', value)
                 break
 
             case 'blockPhrases':

@@ -1,0 +1,33 @@
+# Build artifacts
+/dist
+/build
+*.zip
+*.crx
+*.xpi
+
+# OS/Editor files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# Log files
+*.log
+
+# Node/npm (if used in the future)
+node_modules/
+
+# VSCode
+.vscode/
+
+# Ignore icons generated output (if any)
+icons/generated/
+
+# Ignore test output
+/test-output/
+
+# Cursor IDE
+.cursor
+.cursor-history
+.cursor-tmp
+.cursor-cache 

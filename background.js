@@ -26,13 +26,54 @@ if (chrome.action) {
     })
 }
 
-// Handle messages from content script
+// Handle messages from content script and popup
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    if (request.action === 'getTabInfo') {
-        sendResponse({
-            url: sender.tab?.url,
-            title: sender.tab?.title
-        })
+    console.log('Background received message:', request.action)
+
+    switch (request.action) {
+        case 'getTabInfo':
+            sendResponse({
+                url: sender.tab?.url,
+                title: sender.tab?.title
+            })
+            break
+
+        case 'getStatus':
+            // Provide fallback status when content script is not available
+            chrome.storage.sync.get(['isEnabled', 'blockedProfiles'], (result) => {
+                sendResponse({
+                    isEnabled: result.isEnabled !== undefined ? result.isEnabled : true,
+                    blockedProfiles: result.blockedProfiles || []
+                })
+            })
+            return true // Keep message channel open for async response
+
+        case 'toggleEnabled':
+            // Handle toggle when content script is not available
+            chrome.storage.sync.set({ isEnabled: request.enabled }, () => {
+                sendResponse({ success: true })
+            })
+            return true
+
+        case 'unblockProfile':
+            // Handle unblock when content script is not available
+            chrome.storage.sync.get(['blockedProfiles'], (result) => {
+                const blockedProfiles = result.blockedProfiles || []
+                const updatedProfiles = blockedProfiles.filter(p => {
+                    if (typeof p === 'object') {
+                        return p.username !== request.username
+                    } else {
+                        return p !== request.username
+                    }
+                })
+                chrome.storage.sync.set({ blockedProfiles: updatedProfiles }, () => {
+                    sendResponse({ success: true })
+                })
+            })
+            return true
+
+        default:
+            console.log('Unknown message action:', request.action)
     }
 
     return true

@@ -3,6 +3,7 @@ class SettingsManager {
         console.log('SettingsManager constructor called')
         this.settings = {
             isEnabled: true,
+            useTwitterBlock: true,
             showNotifications: true,
             blockOnlyFans: true,
             blockShorteners: true,
@@ -32,6 +33,7 @@ class SettingsManager {
         try {
             const result = await chrome.storage.sync.get([
                 'isEnabled',
+                'useTwitterBlock',
                 'showNotifications',
                 'blockOnlyFans',
                 'blockShorteners',
@@ -44,6 +46,7 @@ class SettingsManager {
 
             this.settings = {
                 isEnabled: result.isEnabled !== undefined ? result.isEnabled : true,
+                useTwitterBlock: result.useTwitterBlock !== undefined ? result.useTwitterBlock : true,
                 showNotifications: result.showNotifications !== undefined ? result.showNotifications : true,
                 blockOnlyFans: result.blockOnlyFans !== undefined ? result.blockOnlyFans : true,
                 blockShorteners: result.blockShorteners !== undefined ? result.blockShorteners : true,
@@ -65,6 +68,7 @@ class SettingsManager {
         // Toggle buttons
         const toggleElements = [
             'enable-toggle',
+            'twitter-block-toggle',
             'notification-toggle',
             'onlyfans-toggle',
             'shortener-toggle',
@@ -119,6 +123,7 @@ class SettingsManager {
 
         // Update toggles
         const enableToggle = document.getElementById('enable-toggle')
+        const twitterBlockToggle = document.getElementById('twitter-block-toggle')
         const notificationToggle = document.getElementById('notification-toggle')
         const onlyfansToggle = document.getElementById('onlyfans-toggle')
         const shortenerToggle = document.getElementById('shortener-toggle')
@@ -126,40 +131,36 @@ class SettingsManager {
         const phraseToggle = document.getElementById('phrase-toggle')
 
         enableToggle.classList.toggle('active', this.settings.isEnabled)
+        twitterBlockToggle.classList.toggle('active', this.settings.useTwitterBlock)
         notificationToggle.classList.toggle('active', this.settings.showNotifications)
         onlyfansToggle.classList.toggle('active', this.settings.blockOnlyFans)
         shortenerToggle.classList.toggle('active', this.settings.blockShorteners)
         aggregatorToggle.classList.toggle('active', this.settings.blockAggregators)
         phraseToggle.classList.toggle('active', this.settings.blockPhrases)
 
-        console.log('Toggle states:', {
-            enable: this.settings.isEnabled,
-            notification: this.settings.showNotifications,
-            onlyfans: this.settings.blockOnlyFans,
-            shortener: this.settings.blockShorteners,
-            aggregator: this.settings.blockAggregators,
-            phrase: this.settings.blockPhrases
-        })
+        console.log('Settings loaded - Twitter block:', this.settings.useTwitterBlock)
     }
 
     async toggleSetting(setting) {
-        console.log(`Toggle setting called: ${setting}`)
-        console.log(`Current value: ${this.settings[setting]}`)
-
+        console.log(`Toggle setting: ${setting}`)
         this.settings[setting] = !this.settings[setting]
-        console.log(`New value: ${this.settings[setting]}`)
 
         await this.saveSettings()
         this.updateUI()
 
         // Notify content scripts of setting change
         await this.notifyContentScripts(setting, this.settings[setting])
+
+        // Special logging for Twitter block setting
+        if (setting === 'useTwitterBlock') {
+            console.log('Twitter block setting changed to:', this.settings[setting])
+        }
     }
 
     async saveSettings() {
         try {
             await chrome.storage.sync.set(this.settings)
-            console.log('Settings saved:', this.settings)
+            console.log('Settings saved - Twitter block:', this.settings.useTwitterBlock)
         } catch (error) {
             console.error('Error saving settings:', error)
         }
